@@ -7,38 +7,18 @@ interface WhatsAppMessageData {
 }
 
 const ADMIN_PHONE = '+18092033894';
+
+// Variable para evitar ejecuciones múltiples
 let isExecuting = false;
 
-// Función optimizada usando wa.me y acción directa del usuario
-const openWhatsApp = (phone: string, message: string): void => {
-  if (isExecuting) return;
-  
-  isExecuting = true;
-  setTimeout(() => { isExecuting = false; }, 2000);
-  
+// Función para generar URL de WhatsApp
+const generateWhatsAppUrl = (phone: string, message: string): string => {
   const cleanPhone = phone.replace(/\D/g, '');
   const encodedMessage = encodeURIComponent(message);
-  
-  // Usar wa.me que es más confiable en todos los dispositivos
-  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
-  
-  // Crear enlace y hacer click directo (Safari lo reconoce como acción de usuario)
-  const link = document.createElement('a');
-  link.href = whatsappUrl;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  
-  // Agregar al DOM
-  document.body.appendChild(link);
-  
-  // Click inmediato sin setTimeout (clave para Safari)
-  link.click();
-  
-  // Limpiar inmediatamente
-  document.body.removeChild(link);
+  return `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
 };
 
-// Función para crear mensajes optimizada
+// Función para crear mensajes
 const createMessage = (
   type: 'created' | 'cancelled' | 'clientConfirmed' | 'clientCancelled',
   data: WhatsAppMessageData
@@ -107,45 +87,61 @@ Ha sido cancelada.
   return messages[type];
 };
 
-// Función genérica para enviar notificaciones
-const sendNotification = async (phone: string, message: string): Promise<{ success: boolean; error?: string }> => {
-  try {
-    openWhatsApp(phone, message);
-    return { success: true };
-  } catch (error) {
-    console.error('Error enviando notificación WhatsApp:', error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Error desconocido' 
-    };
-  }
+// Función principal - SOLO para clicks directos del usuario
+const openWhatsApp = (phone: string, message: string): void => {
+  if (isExecuting) return;
+  
+  isExecuting = true;
+  setTimeout(() => { isExecuting = false; }, 2000);
+  
+  const url = generateWhatsAppUrl(phone, message);
+  
+  // CLAVE: Solo window.location.href - funciona en Safari cuando es click directo
+  window.location.href = url;
 };
 
-// Funciones exportadas optimizadas
+// Funciones principales para usar SOLO en event handlers directos
 export const notifyAppointmentCreated = (data: WhatsAppMessageData) => {
   const message = createMessage('created', data);
-  return sendNotification(ADMIN_PHONE, message);
+  openWhatsApp(ADMIN_PHONE, message);
+  return { success: true };
 };
 
 export const notifyAppointmentCancelled = (data: WhatsAppMessageData) => {
   const message = createMessage('cancelled', data);
-  return sendNotification(ADMIN_PHONE, message);
+  openWhatsApp(ADMIN_PHONE, message);
+  return { success: true };
 };
 
 export const notifyClientAppointmentConfirmed = (data: WhatsAppMessageData) => {
   const message = createMessage('clientConfirmed', data);
-  return sendNotification(data.clientPhone, message);
+  openWhatsApp(data.clientPhone, message);
+  return { success: true };
 };
 
 export const notifyClientAppointmentCancelled = (data: WhatsAppMessageData) => {
   const message = createMessage('clientCancelled', data);
-  return sendNotification(data.clientPhone, message);
+  openWhatsApp(data.clientPhone, message);
+  return { success: true };
 };
 
-// Función adicional para verificar si WhatsApp está disponible
-export const isWhatsAppAvailable = (): boolean => {
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isAndroid = /Android/i.test(navigator.userAgent);
-  
-  return isIOS || isAndroid || typeof window !== 'undefined';
+// Funciones helper para obtener URLs (si necesitas mostrar enlaces)
+export const getAppointmentCreatedUrl = (data: WhatsAppMessageData): string => {
+  const message = createMessage('created', data);
+  return generateWhatsAppUrl(ADMIN_PHONE, message);
+};
+
+export const getAppointmentCancelledUrl = (data: WhatsAppMessageData): string => {
+  const message = createMessage('cancelled', data);
+  return generateWhatsAppUrl(ADMIN_PHONE, message);
+};
+
+export const getClientConfirmationUrl = (data: WhatsAppMessageData): string => {
+  const message = createMessage('clientConfirmed', data);
+  return generateWhatsAppUrl(data.clientPhone, message);
+};
+
+export const getClientCancellationUrl = (data: WhatsAppMessageData): string => {
+  const message = createMessage('clientCancelled', data);
+  return generateWhatsAppUrl(data.clientPhone, message);
 };
