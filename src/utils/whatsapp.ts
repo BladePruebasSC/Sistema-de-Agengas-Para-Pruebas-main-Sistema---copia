@@ -9,7 +9,7 @@ interface WhatsAppMessageData {
 const ADMIN_PHONE = '+18092033894';
 let isExecuting = false;
 
-// Función optimizada para abrir WhatsApp sin redirección
+// Función optimizada usando wa.me y acción directa del usuario
 const openWhatsApp = (phone: string, message: string): void => {
   if (isExecuting) return;
   
@@ -19,51 +19,23 @@ const openWhatsApp = (phone: string, message: string): void => {
   const cleanPhone = phone.replace(/\D/g, '');
   const encodedMessage = encodeURIComponent(message);
   
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isAndroid = /Android/i.test(navigator.userAgent);
+  // Usar wa.me que es más confiable en todos los dispositivos
+  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
   
-  if (isIOS) {
-    // iOS: crear enlace temporal y hacer click para evitar redirección
-    const link = document.createElement('a');
-    link.href = `whatsapp://send?phone=${cleanPhone}&text=${encodedMessage}`;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    
-    // Agregar al DOM temporalmente
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    
-    // Hacer click inmediatamente
-    link.click();
-    
-    // Limpiar después de un momento
-    setTimeout(() => {
-      document.body.removeChild(link);
-    }, 100);
-    
-  } else if (isAndroid) {
-    // Android: crear iframe invisible para evitar redirección
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = `whatsapp://send?phone=${cleanPhone}&text=${encodedMessage}`;
-    
-    document.body.appendChild(iframe);
-    
-    // Limpiar el iframe después de un momento
-    setTimeout(() => {
-      if (document.body.contains(iframe)) {
-        document.body.removeChild(iframe);
-      }
-    }, 1000);
-    
-  } else {
-    // Escritorio: WhatsApp Web
-    window.open(
-      `https://web.whatsapp.com/send?phone=${cleanPhone}&text=${encodedMessage}`, 
-      '_blank', 
-      'noopener,noreferrer'
-    );
-  }
+  // Crear enlace y hacer click directo (Safari lo reconoce como acción de usuario)
+  const link = document.createElement('a');
+  link.href = whatsappUrl;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  
+  // Agregar al DOM
+  document.body.appendChild(link);
+  
+  // Click inmediato sin setTimeout (clave para Safari)
+  link.click();
+  
+  // Limpiar inmediatamente
+  document.body.removeChild(link);
 };
 
 // Función para crear mensajes optimizada
