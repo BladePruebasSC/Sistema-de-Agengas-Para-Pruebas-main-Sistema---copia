@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, ReactNode, useEffect, useCa
 import { Appointment, Holiday, BlockedTime, Barber, BusinessHours, BarberSchedule, AdminSettings, Review, CreateReviewData, Service } from '../types';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
-import { notifyAppointmentCreated, notifyAppointmentCancelled } from '../services/whatsappService';
+import { notifyAppointmentCreated, notifyAppointmentCancelled } from '../utils/whatsapp'; // MODIFIED IMPORT
 import { formatDateForSupabase, parseSupabaseDate, isSameDate, isDateBefore, isFutureDate } from '../utils/dateUtils';
 import { formatPhoneForWhatsApp } from '../utils/phoneUtils'; // Importar la función
 import { format, startOfDay } from 'date-fns';
@@ -706,7 +706,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
           time: appointmentData.time,
           service: appointmentData.service,
           barberName: barber?.name || 'Barbero',
-          barberPhone
+          barberPhone: barberPhone, // Este es el teléfono del destinatario (barbero)
+          recipientPhone: barberPhone, // Satisfy interface, primary use is barberPhone for this func
         });
       } catch (whatsappError) {
         console.error('Error enviando WhatsApp:', whatsappError);
@@ -754,13 +755,13 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         await notifyAppointmentCancelled({
           recipientPhone: appointmentToCancel.clientPhone, // Enviar al cliente
           clientName: appointmentToCancel.clientName,
-          clientPhone: appointmentToCancel.clientPhone, // Aún necesario para contexto del mensaje si se reutiliza la interfaz
+          clientPhone: appointmentToCancel.clientPhone, // Aún necesario para contexto del mensaje
           date: format(appointmentToCancel.date, 'dd/MM/yyyy'),
           time: appointmentToCancel.time,
           service: appointmentToCancel.service,
           barberName: barber?.name || 'la Barbería', // Nombre del barbero o genérico
           cancellationInitiator: 'business', // Cancelación iniciada por el negocio
-          // businessName: "D' Gastón Stylo Barbería" // Opcional, si se quiere pasar explícitamente
+          businessName: adminSettings.business_name || "D' Gastón Stylo Barbería" // Opcional, si se quiere pasar explícitamente
         });
       } catch (whatsappError) {
         console.error('Error enviando WhatsApp de notificación de cancelación al cliente:', whatsappError);
