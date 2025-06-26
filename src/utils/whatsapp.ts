@@ -9,7 +9,7 @@ interface WhatsAppMessageData {
 const ADMIN_PHONE = '+18092033894';
 let isExecuting = false;
 
-// Función optimizada para abrir WhatsApp con diferenciación iOS/Android
+// Función optimizada para abrir WhatsApp sin redirección
 const openWhatsApp = (phone: string, message: string): void => {
   if (isExecuting) return;
   
@@ -23,11 +23,39 @@ const openWhatsApp = (phone: string, message: string): void => {
   const isAndroid = /Android/i.test(navigator.userAgent);
   
   if (isIOS) {
-    // iOS: usar location.assign para evitar bloqueo de Safari y mostrar diálogo nativo
-    window.location.assign(`whatsapp://send?phone=${cleanPhone}&text=${encodedMessage}`);
+    // iOS: crear enlace temporal y hacer click para evitar redirección
+    const link = document.createElement('a');
+    link.href = `whatsapp://send?phone=${cleanPhone}&text=${encodedMessage}`;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    
+    // Agregar al DOM temporalmente
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    
+    // Hacer click inmediatamente
+    link.click();
+    
+    // Limpiar después de un momento
+    setTimeout(() => {
+      document.body.removeChild(link);
+    }, 100);
+    
   } else if (isAndroid) {
-    // Android: puede usar window.open con target _self para mejor compatibilidad
-    window.open(`whatsapp://send?phone=${cleanPhone}&text=${encodedMessage}`, '_self');
+    // Android: crear iframe invisible para evitar redirección
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = `whatsapp://send?phone=${cleanPhone}&text=${encodedMessage}`;
+    
+    document.body.appendChild(iframe);
+    
+    // Limpiar el iframe después de un momento
+    setTimeout(() => {
+      if (document.body.contains(iframe)) {
+        document.body.removeChild(iframe);
+      }
+    }, 1000);
+    
   } else {
     // Escritorio: WhatsApp Web
     window.open(
