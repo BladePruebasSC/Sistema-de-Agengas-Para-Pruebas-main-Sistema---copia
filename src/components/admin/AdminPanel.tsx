@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, XCircle, Settings as SettingsIcon, BarChart3, Star, User } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, XCircle, Settings as SettingsIcon, BarChart3, Star, User, Package } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAppointments } from '../../context/AppointmentContext';
@@ -8,12 +8,13 @@ import BlockedTimeForm from './BlockedTimeForm';
 import AdminSettings from './AdminSettings';
 import StatisticsPanel from './StatisticsPanel';
 import BarberScheduleManager from './BarberScheduleManager';
+import ServicesManagement from './ServicesManagement';
 import AppointmentList from '../AppointmentList';
 import ReviewsManagement from '../reviews/ReviewsManagement';
 import { Holiday, BlockedTime } from '../../types';
 
 const AdminPanel: React.FC = () => {
-  const [tab, setTab] = useState<'appointments' | 'holidays' | 'blockedTimes' | 'settings' | 'statistics' | 'reviews' | 'barberSchedules'>('appointments');
+  const [tab, setTab] = useState<'appointments' | 'holidays' | 'blockedTimes' | 'settings' | 'statistics' | 'reviews' | 'barberSchedules' | 'services'>('appointments');
   const { holidays, blockedTimes, removeHoliday, removeBlockedTime, adminSettings } = useAppointments();
 
   return (
@@ -54,6 +55,16 @@ const AdminPanel: React.FC = () => {
               Reseñas
             </button>
           )}
+          <button
+            className={`py-2 px-4 font-medium text-sm whitespace-nowrap ${
+              tab === 'services'
+                ? 'text-red-600 border-b-2 border-red-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+            onClick={() => setTab('services')}
+          >
+            Servicios
+          </button>
           <button
             className={`py-2 px-4 font-medium text-sm whitespace-nowrap ${
               tab === 'holidays'
@@ -108,6 +119,10 @@ const AdminPanel: React.FC = () => {
 
         {tab === 'reviews' && adminSettings.reviews_enabled !== false && (
           <ReviewsManagement />
+        )}
+
+        {tab === 'services' && (
+          <ServicesManagement />
         )}
 
         {tab === 'barberSchedules' && adminSettings.multiple_barbers_enabled && (

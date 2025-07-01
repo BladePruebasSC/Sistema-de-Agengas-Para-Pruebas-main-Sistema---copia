@@ -48,6 +48,10 @@ interface AppointmentContextType {
   deleteReview: (id: string) => Promise<void>;
   getApprovedReviews: () => Review[];
   getAverageRating: () => number;
+  // Funciones para servicios
+  createService: (serviceData: Omit<Service, 'created_at'>) => Promise<Service>;
+  updateService: (id: string, serviceData: Partial<Service>) => Promise<void>;
+  deleteService: (id: string) => Promise<void>;
   // Barber Access Key Auth
   loggedInBarber: Barber | null;
   verifyBarberAccessKey: (accessKey: string) => Promise<Barber | null>;
@@ -1068,6 +1072,57 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
   };
 
+  // Funciones para servicios
+  const createService = async (serviceData: Omit<Service, 'created_at'>): Promise<Service> => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .insert([{
+          ...serviceData,
+          is_active: true
+        }])
+        .select()
+        .single();
+      if (error) throw error;
+      setServices(prev => [...prev, data]);
+      toast.success('Servicio creado exitosamente');
+      return data;
+    } catch (error) {
+      toast.error('Error al crear el servicio');
+      throw error;
+    }
+  };
+
+  const updateService = async (id: string, serviceData: Partial<Service>): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('services')
+        .update(serviceData)
+        .eq('id', id);
+      if (error) throw error;
+      setServices(prev => prev.map(s => s.id === id ? { ...s, ...serviceData } : s));
+      toast.success('Servicio actualizado exitosamente');
+    } catch (error) {
+      toast.error('Error al actualizar el servicio');
+      throw error;
+    }
+  };
+
+  const deleteService = async (id: string): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('services')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      setServices(prev => prev.filter(s => s.id !== id));
+      toast.success('Servicio eliminado exitosamente');
+    } catch (error) {
+      toast.error('Error al eliminar el servicio');
+      throw error;
+    }
+  };
+
   const handleSetUserPhone = (phone: string) => {
     setUserPhone(phone);
     localStorage.setItem('userPhone', phone);
@@ -1163,6 +1218,10 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     deleteReview,
     getApprovedReviews,
     getAverageRating,
+    // Funciones para servicios
+    createService,
+    updateService,
+    deleteService,
     // Barber Access Key Auth
     loggedInBarber,
     verifyBarberAccessKey,
