@@ -199,7 +199,7 @@ const StatisticsPanel: React.FC = () => {
 
   const getBarberName = (barberId: string) => {
     const barber = barbers.find(b => b.id === barberId);
-    return barber?.name || 'Barbero desconocido';
+    return barber?.name || 'Asistente desconocido';
   };
 
   const StatCard: React.FC<{
@@ -237,7 +237,7 @@ const StatisticsPanel: React.FC = () => {
         
         {/* Controles */}
         <div className="flex flex-col space-y-3 lg:space-y-0 lg:flex-row lg:items-center lg:space-x-4">
-          {/* Selector de barbero */}
+          {/* Selector de Asistente */}
           {adminSettings.multiple_barbers_enabled && (
             <div className="flex items-center space-x-2">
               <User className="h-4 w-4 text-gray-600" />
@@ -246,7 +246,7 @@ const StatisticsPanel: React.FC = () => {
                 onChange={(e) => setSelectedBarberId(e.target.value || null)}
                 className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:ring-red-500 focus:border-red-500"
               >
-                <option value="">Todos los barberos</option>
+                <option value="">Todos los Asistentes</option>
                 {barbers.map(barber => (
                   <option key={barber.id} value={barber.id}>
                     {barber.name}

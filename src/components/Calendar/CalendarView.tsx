@@ -123,11 +123,11 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       // Si es un feriado general, aplica a todos.
       if (holiday.barber_id === null) return true;
 
-      // Si se ha seleccionado un barbero, y el feriado es para ese barbero.
+      // Si se ha seleccionado un asistente, y el feriado es para ese asistente.
       if (currentBarberId && holiday.barber_id === currentBarberId) return true;
 
-      // Si no se ha seleccionado barbero (mostrando disponibilidad general) y el feriado es específico, no lo consideramos festivo para la vista general.
-      // A menos que la configuración de "múltiples barberos" esté desactivada, en cuyo caso cualquier feriado específico podría considerarse general.
+      // Si no se ha seleccionado asistente (mostrando disponibilidad general) y el feriado es específico, no lo consideramos festivo para la vista general.
+      // A menos que la configuración de "múltiples asistentes" esté desactivada, en cuyo caso cualquier feriado específico podría considerarse general.
       // Para este caso, si no hay barberId seleccionado, solo los generales cuentan.
       if (!currentBarberId && holiday.barber_id !== null) return false;
 
@@ -139,14 +139,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     if (view !== 'month') return '';
     const classes = [];
     if (isToday(date)) classes.push('bg-blue-100');
-    // Usar isHolidayForContext con el barbero seleccionado para la clase
+    // Usar isHolidayForContext con el asistente seleccionado para la clase
     if (isHolidayForContext(date, selectedBarberId)) classes.push('holiday');
     return classes.join(' ');
   };
 
   const tileDisabled = ({ date, view }: { date: Date; view: string }) => {
     if (view !== 'month') return false;
-    // Un tile está deshabilitado si es anterior a hoy O si es un feriado para el contexto actual (barbero seleccionado o general)
+    // Un tile está deshabilitado si es anterior a hoy O si es un feriado para el contexto actual (asistente seleccionado o general)
     return isBefore(date, today) || isHolidayForContext(date, selectedBarberId);
   };
 
@@ -178,7 +178,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     if (onBarberChange) {
       onBarberChange(barberId);
     }
-    // Limpiar tiempo seleccionado cuando cambia el barbero
+    // Limpiar tiempo seleccionado cuando cambia el asistente
     onTimeChange(null);
   };
 
@@ -230,7 +230,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
           {selectedDate && (
             <div>
               <h3 className="text-lg font-medium mb-2">
-                2. Selecciona {adminSettings.multiple_barbers_enabled ? 'Barbero y ' : ''}Horario
+                2. Selecciona {adminSettings.multiple_barbers_enabled ? 'Asistente y ' : ''}Horario
               </h3>
               <p className="text-sm text-gray-600 mb-2">
                 {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: es })}
@@ -244,7 +244,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 </p>
               )}
 
-              {/* Selector de barbero si está habilitado */}
+              {/* Selector de asistente si está habilitado */}
               {adminSettings.multiple_barbers_enabled && (
                 <div className="mb-4">
                   <BarberSelector
@@ -278,7 +278,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
 
               {adminSettings.multiple_barbers_enabled && !selectedBarberId && (
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
-                  <p className="text-blue-600 font-medium">Selecciona un barbero para ver los horarios disponibles</p>
+                  <p className="text-blue-600 font-medium">Selecciona un asistente para ver los horarios disponibles</p>
                 </div>
               )}
             </div>

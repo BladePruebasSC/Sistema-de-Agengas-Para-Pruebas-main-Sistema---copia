@@ -205,11 +205,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess, onCancel }) => {
           </select>
         </div>
 
-        {/* Barbero (opcional) */}
+        {/* asistente (opcional) */}
         {adminSettings.multiple_barbers_enabled && (
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Barbero (opcional)
+              Asistente (opcional)
             </label>
             <select
               name="barber_id"
@@ -217,7 +217,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess, onCancel }) => {
               onChange={handleChange}
               className="block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
             >
-              <option value="">Seleccionar barbero</option>
+              <option value="">Seleccionar asistente</option>
               {barbers.map(barber => (
                 <option key={barber.id} value={barber.id}>
                   {barber.name}

@@ -41,7 +41,7 @@ const AdminSettings: React.FC = () => {
   // Estados para horarios de negocio
   const [hoursSettings, setHoursSettings] = useState<any[]>([]);
 
-  // Estados para barberos
+  // Estados para asistentes
   const [newBarber, setNewBarber] = useState({ name: '', phone: '', access_key: '' });
   const [editingBarber, setEditingBarber] = useState<string | null>(null);
   const [editingBarberData, setEditingBarberData] = useState({ id: null as string | null, name: '', phone: '', access_key: '' });
@@ -142,7 +142,7 @@ const AdminSettings: React.FC = () => {
       });
       setNewBarber({ name: '', phone: '', access_key: '' });
     } catch (error) {
-      console.error('Error creando barbero:', error);
+      console.error('Error creando asistente:', error);
     }
   };
 
@@ -151,18 +151,18 @@ const AdminSettings: React.FC = () => {
       await updateBarber(id, data);
       setEditingBarber(null);
     } catch (error) {
-      console.error('Error actualizando barbero:', error);
+      console.error('Error actualizando asistente:', error);
     }
   };
 
   const handleDeleteBarber = async (id: string) => {
     // Check if the barber to be deleted is the default barber
     if (adminSettings.default_barber_id === id) {
-      toast.error('Este barbero está configurado como el barbero por defecto. Por favor, selecciona un barbero por defecto diferente antes de eliminar este.');
+      toast.error('Este asistente está configurado como el asistente por defecto. Por favor, selecciona un asistente por defecto diferente antes de eliminar este.');
       return;
     }
 
-    if (window.confirm('¿Estás seguro de que deseas eliminar este barbero? Esta acción es irreversible y también eliminará sus horarios específicos.')) {
+    if (window.confirm('¿Estás seguro de que deseas eliminar este asistente? Esta acción es irreversible y también eliminará sus horarios específicos.')) {
       try {
         await deleteBarber(id);
         // Optionally, if the deleted barber was the one being edited, clear the edit form
@@ -171,7 +171,7 @@ const AdminSettings: React.FC = () => {
           setEditingBarberData({ id: null, name: '', phone: '', access_key: '' });
         }
       } catch (error) {
-        console.error('Error eliminando barbero:', error);
+        console.error('Error eliminando asistente:', error);
         // Error toast is already handled in deleteBarber context function
       }
     }
@@ -217,7 +217,7 @@ const AdminSettings: React.FC = () => {
           onClick={() => setActiveTab('barbers')}
         >
           <Users className="h-4 w-4 inline mr-1" />
-          Barberos
+          asistentes
         </button>
       </div>
 
@@ -258,14 +258,14 @@ const AdminSettings: React.FC = () => {
             </div>
           </div>
 
-          {/* Múltiples barberos */}
+          {/* Múltiples asistentes */}
           <div className="border border-gray-200 rounded-lg p-4">
             <div className="flex items-start space-x-3">
               <Users className="h-5 w-5 text-blue-500 mt-1" />
               <div className="flex-1">
-                <h3 className="text-lg font-medium mb-2">Configuración de Barberos</h3>
+                <h3 className="text-lg font-medium mb-2">Configuración de asistentes</h3>
                 <p className="text-gray-600 text-sm mb-4">
-                  Habilita el modo múltiples barberos para permitir selección de barbero específico.
+                  Habilita el modo múltiples asistentes para permitir selección de asistente específico.
                 </p>
                 
                 <div className="space-y-4">
@@ -280,13 +280,13 @@ const AdminSettings: React.FC = () => {
                       className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                     />
                     <span className="ml-2 text-sm font-medium">
-                      Habilitar múltiples barberos
+                      Habilitar múltiples asistentes
                     </span>
                   </label>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Barbero por defecto:
+                      asistente por defecto:
                     </label>
                     <select
                       value={generalSettings.default_barber_id}
@@ -296,7 +296,7 @@ const AdminSettings: React.FC = () => {
                       })}
                       className="block w-64 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
                     >
-                      <option value="">Seleccionar barbero</option>
+                      <option value="">Seleccionar asistente</option>
                       {barbers.map(barber => (
                         <option key={barber.id} value={barber.id}>
                           {barber.name}
@@ -508,12 +508,12 @@ const AdminSettings: React.FC = () => {
         </div>
       )}
 
-      {/* Configuración de Barberos */}
+      {/* Configuración de asistentes */}
       {activeTab === 'barbers' && (
         <div className="space-y-6">
-          {/* Agregar nuevo barbero */}
+          {/* Agregar nuevo asistente */}
           <div className="border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-medium mb-4">Agregar Nuevo Barbero</h3>
+            <h3 className="text-lg font-medium mb-4">Agregar Nuevo asistente</h3>
             {/* Adjusted grid to md:grid-cols-4 to accommodate the new field and button */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
@@ -525,7 +525,7 @@ const AdminSettings: React.FC = () => {
                   value={newBarber.name}
                   onChange={(e) => setNewBarber({ ...newBarber, name: e.target.value })}
                   className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
-                  placeholder="Nombre del barbero"
+                  placeholder="Nombre del asistente"
                 />
               </div>
               <div>
@@ -564,11 +564,11 @@ const AdminSettings: React.FC = () => {
             </div>
           </div>
 
-          {/* Lista de barberos */}
+          {/* Lista de asistentes */}
           <div className="border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-medium mb-4">Barberos Activos</h3>
+            <h3 className="text-lg font-medium mb-4">asistentes Activos</h3>
             {barbers.length === 0 ? (
-              <p className="text-gray-500">No hay barberos registrados.</p>
+              <p className="text-gray-500">No hay asistentes registrados.</p>
             ) : (
               <div className="space-y-3">
                 {barbers.map((barber) => (
@@ -607,14 +607,14 @@ const AdminSettings: React.FC = () => {
                           }
                         }}
                         className="text-blue-600 hover:text-blue-800"
-                        title="Editar barbero"
+                        title="Editar asistente"
                       >
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteBarber(barber.id)}
                         className="text-red-600 hover:text-red-800"
-                        title="Eliminar barbero" // Changed title
+                        title="Eliminar asistente" // Changed title
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -630,7 +630,7 @@ const AdminSettings: React.FC = () => {
             <div className="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
               <div className="relative mx-auto p-6 border w-full max-w-md shadow-lg rounded-md bg-white">
                 <h3 className="text-xl font-semibold leading-6 text-gray-900 mb-6">
-                  Editar Barbero: {editingBarberData.name}
+                  Editar asistente: {editingBarberData.name}
                 </h3>
                 <div className="space-y-4">
                   <div>
@@ -639,7 +639,7 @@ const AdminSettings: React.FC = () => {
                     </label>
                     <input
                       type="text"
-                      placeholder="Nombre del barbero"
+                      placeholder="Nombre del asistente"
                       value={editingBarberData.name}
                       onChange={(e) => setEditingBarberData({ ...editingBarberData, name: e.target.value })}
                       className="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"

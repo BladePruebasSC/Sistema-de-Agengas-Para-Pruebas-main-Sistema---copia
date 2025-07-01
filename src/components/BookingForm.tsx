@@ -89,7 +89,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     if (adminSettings.multiple_barbers_enabled) {
       // Considera faltante si es null, undefined, o un string vacío.
       // Un número (como 1) no se consideraría faltante por esta lógica específica de "missing".
-      // El backend luego validará si '1' es un ID de barbero válido.
+      // El backend luego validará si '1' es un ID de asistente válido.
       if (formData.barber_id == null || formData.barber_id === '') { // Usar == null para cubrir undefined y null, y === '' para string vacío
         isBarberIdMissing = true;
       } else if (typeof formData.barber_id === 'string' && formData.barber_id.trim() === '') {
@@ -100,7 +100,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     }
 
     if (isBarberIdMissing) {
-      newErrors.barber_id = 'Debe seleccionar un barbero';
+      newErrors.barber_id = 'Debe seleccionar un asistente';
     }
 
     setErrors(newErrors);
@@ -131,7 +131,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
       // esta lógica no lo re-añadirá ni antepondrá +1. Se guardará "52...".
       // Si se quiere ser más estricto o manejar más casos, esta lógica se puede expandir.
 
-      // Usar el barbero seleccionado o el por defecto
+      // Usar el asistente seleccionado o el por defecto
       const finalBarberId = selectedBarberId || formData.barber_id || adminSettings.default_barber_id;
       console.log('[HandleSubmit] finalBarberId for createAppointment:', finalBarberId,
                   'selectedBarberId:', selectedBarberId,
@@ -144,13 +144,13 @@ const BookingForm: React.FC<BookingFormProps> = ({
         clientName: formData.clientName.trim(),
         clientPhone: processedPhone, // Usar el número procesado
         service: formData.service,
-        barber_id: finalBarberId, // Asegurar que se use el barbero correcto
+        barber_id: finalBarberId, // Asegurar que se use el asistente correcto
         confirmed: true
       });
       toast.success(
         <div>
           <p className="font-bold">¡Cita confirmada!</p>
-          <p>Se enviará notificación al barbero por WhatsApp</p>
+          <p>Se enviará notificación al asistente por WhatsApp</p>
         </div>,
         { duration: 5000 }
       );
@@ -169,7 +169,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
   const getBarberName = (barberId: string) => {
     const barber = barbers.find(b => b.id === barberId);
-    return barber?.name || 'Barbero';
+    return barber?.name || 'asistente';
   };
 
   return (
@@ -215,7 +215,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
           {adminSettings.multiple_barbers_enabled && !selectedBarberId && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Selecciona el barbero
+                Selecciona el asistente
               </label>
               <select
                 name="barber_id"
@@ -225,7 +225,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                   errors.barber_id ? 'border-red-500' : 'border-gray-300'
                 } rounded-md shadow-sm focus:ring-red-500 focus:border-red-500`}
               >
-                <option value="">Seleccionar barbero</option>
+                <option value="">Seleccionar asistente</option>
                 {barbers.map(barber => (
                   <option key={barber.id} value={barber.id}>
                     {barber.name}
@@ -283,7 +283,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
         <div className="mt-6 flex items-center">
           <MessageSquare className="h-5 w-5 text-green-600 mr-2" />
           <p className="text-sm text-gray-600">
-            Se notificará automáticamente al barbero por WhatsApp después de reservar.
+            Se notificará automáticamente al asistente por WhatsApp después de reservar.
           </p>
         </div>
         

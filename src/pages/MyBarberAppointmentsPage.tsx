@@ -34,7 +34,7 @@ const MyBarberAppointmentsPage: React.FC = () => {
     setError(null);
     const barber = await verifyBarberAccessKey(accessKey);
     if (!barber) {
-      setError('Clave de acceso incorrecta o barbero no activo.');
+      setError('Clave de acceso incorrecta o asistente no activo.');
       setAccessKey(''); // Clear the input after failed attempt
     }
     setIsLoading(false);
@@ -51,7 +51,7 @@ const MyBarberAppointmentsPage: React.FC = () => {
       <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
         <div className="flex flex-col items-center mb-6">
           <Lock size={48} className="text-red-500 mb-3" />
-          <h2 className="text-2xl font-semibold text-center text-gray-700">Acceso para Barberos</h2>
+          <h2 className="text-2xl font-semibold text-center text-gray-700">Acceso para Asistentes</h2>
           <p className="text-sm text-gray-500 text-center mt-1">Ingresa tu clave para ver tus citas agendadas.</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-4">
@@ -94,7 +94,7 @@ const MyBarberAppointmentsPage: React.FC = () => {
           <ListChecks size={32} className="text-red-600 mr-3" />
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Mis Citas Agendadas</h1>
-            <p className="text-md text-gray-600">Barbero: {loggedInBarber.name}</p>
+            <p className="text-md text-gray-600">Asistente: {loggedInBarber.name}</p>
           </div>
         </div>
         <button

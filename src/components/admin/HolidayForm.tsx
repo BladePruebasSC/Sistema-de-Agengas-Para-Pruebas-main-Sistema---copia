@@ -80,7 +80,7 @@ const HolidayForm: React.FC = () => {
           {adminSettings.multiple_barbers_enabled && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Barbero (Opcional)
+                Asistente (Opcional)
               </label>
               <select
                 value={selectedBarberIdForHoliday || ''}
@@ -95,7 +95,7 @@ const HolidayForm: React.FC = () => {
                 ))}
               </select>
               <p className="text-xs text-gray-500 mt-1">
-                Si seleccionas un barbero, el feriado aplicará solo a él.
+                Si seleccionas un Asistente, el feriado aplicará solo a él.
               </p>
             </div>
           )}

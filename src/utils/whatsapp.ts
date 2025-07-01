@@ -44,7 +44,7 @@ const createMessage = (
 📅 *Fecha:* ${date}
 🕒 *Hora:* ${time}
 💼 *Servicio:* ${service}
-👨‍💼 *Barbero:* ${barberName || 'No especificado'}
+👨‍💼 *Asistente:* ${barberName || 'No especificado'}
 
 ¡Nueva cita confirmada en el sistema!`,
 
@@ -70,7 +70,7 @@ Lamentamos cualquier inconveniente. Por favor, contáctanos si deseas reprograma
 📅 *Fecha:* ${date}
 🕒 *Hora:* ${time}
 💼 *Servicio:* ${service}
-👨‍💼 *Barbero Asignado:* ${barberName || 'No especificado'}
+👨‍💼 *Asistente Asignado:* ${barberName || 'No especificado'}
 
 ⚠️ *El horario está ahora disponible para nuevas citas.*`,
 
@@ -83,8 +83,6 @@ Lamentamos cualquier inconveniente. Por favor, contáctanos si deseas reprograma
 📅 *Fecha:* ${date}
 🕒 *Hora:* ${time}
 💼 *Servicio:* ${service}
-
-📍 *Dirección:* [Tu dirección aquí]
 
 ⏰ Te recomendamos llegar 5 minutos antes.
 

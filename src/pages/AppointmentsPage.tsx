@@ -58,7 +58,7 @@ const AppointmentsPage: React.FC = () => {
   const getBarberName = (barber_id?: string) => {
     if (!barber_id) return 'No asignado';
     const barber = barbers.find(b => b.id === barber_id);
-    return barber?.name || 'Barbero desconocido';
+    return barber?.name || 'Asistente desconocido';
   };
 
   const userAppointments = React.useMemo(() => {
@@ -118,7 +118,7 @@ const AppointmentsPage: React.FC = () => {
                     {appointment.time}
                   </p>
                   <p className="text-sm text-gray-600">
-                    <span className="font-medium">Barbero:</span>{' '}
+                    <span className="font-medium">Asistente:</span>{' '}
                     {getBarberName(appointment.barber_id)}
                   </p>
                   <p className="text-sm text-gray-600">

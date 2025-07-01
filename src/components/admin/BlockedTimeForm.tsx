@@ -60,7 +60,7 @@ const BlockedTimeForm: React.FC<BlockedTimeFormProps> = ({ onBlockTime }) => {
     }
   };
   
-  // Usar los horarios dinámicos basados en la configuración de negocio y barbero seleccionado
+  // Usar los horarios dinámicos basados en la configuración de negocio y Asistente seleccionado
   const availableTimeSlots = date ? getAvailableHoursForDate(date, selectedBarberIdForBlock || undefined) : [];
   
   return (
@@ -103,7 +103,7 @@ const BlockedTimeForm: React.FC<BlockedTimeFormProps> = ({ onBlockTime }) => {
           {adminSettings.multiple_barbers_enabled && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Barbero (Opcional)
+                Asistente (Opcional)
               </label>
               <select
                 value={selectedBarberIdForBlock === null ? '' : String(selectedBarberIdForBlock)} // Ensure value is string for select
@@ -126,7 +126,7 @@ const BlockedTimeForm: React.FC<BlockedTimeFormProps> = ({ onBlockTime }) => {
                 ))}
               </select>
               <p className="text-xs text-gray-500 mt-1">
-                Si seleccionas un barbero, el bloqueo y los horarios disponibles aplicarán solo a él.
+                Si seleccionas un Asistente, el bloqueo y los horarios disponibles aplicarán solo a él.
               </p>
             </div>
           )}

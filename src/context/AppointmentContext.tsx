@@ -32,13 +32,13 @@ interface AppointmentContextType {
   loadAdminSettings: () => Promise<void>;
   getFutureAppointments: () => Appointment[];
   getActiveAppointments: () => Appointment[];
-  // Funciones para barberos
+  // Funciones para asistentes
   createBarber: (barberData: Omit<Barber, 'id' | 'created_at' | 'updated_at'>) => Promise<Barber>;
   updateBarber: (id: string, barberData: Partial<Barber>) => Promise<void>;
   deleteBarber: (id: string) => Promise<void>;
   // Funciones para horarios de negocio
   updateBusinessHours: (dayOfWeek: number, hours: Partial<BusinessHours>) => Promise<void>;
-  // Funciones para horarios de barberos
+  // Funciones para horarios de asistentes
   updateBarberSchedule: (barberId: string, dayOfWeek: number, schedule: Partial<BarberSchedule>) => Promise<void>;
   // Función para actualizar configuración
   updateAdminSettings: (settings: Partial<AdminSettings>) => Promise<void>;
@@ -168,31 +168,31 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     return appointments.filter(appointment => !appointment.cancelled);
   }, [appointments]);
 
-  // Función para obtener horarios disponibles según configuración (con soporte para barberos específicos)
+  // Función para obtener horarios disponibles según configuración (con soporte para asistentes específicos)
   const getAvailableHoursForDate = useCallback((date: Date, barberId?: string): string[] => {
     const dayOfWeek = date.getDay();
     
-    // Si hay barberId específico y horarios de barbero habilitados, usar horarios del barbero
+    // Si hay barberId específico y horarios de asistente habilitados, usar horarios del asistente
     if (barberId && adminSettings.multiple_barbers_enabled) {
       const barberSchedule = barberSchedules.find(bs => 
         bs.barber_id === barberId && bs.day_of_week === dayOfWeek
       );
       
       if (barberSchedule && !barberSchedule.is_available) {
-        return []; // Barbero no disponible este día
+        return []; // asistente no disponible este día
       }
       
       if (barberSchedule) {
         const hours: string[] = [];
         
-        // Horarios de mañana del barbero
+        // Horarios de mañana del asistente
         if (barberSchedule.morning_start && barberSchedule.morning_end) {
           const startHour = parseInt(barberSchedule.morning_start.split(':')[0]);
           const endHour = parseInt(barberSchedule.morning_end.split(':')[0]);
           hours.push(...generateHoursRange(startHour, endHour - 1));
         }
         
-        // Horarios de tarde del barbero
+        // Horarios de tarde del asistente
         if (barberSchedule.afternoon_start && barberSchedule.afternoon_end) {
           const startHour = parseInt(barberSchedule.afternoon_start.split(':')[0]);
           const endHour = parseInt(barberSchedule.afternoon_end.split(':')[0]);
@@ -305,7 +305,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       if (error) throw error;
       setBarbers(data || []);
     } catch (error) {
-      toast.error('Error al cargar los barberos');
+      toast.error('Error al cargar los asistentes');
     }
   };
 
@@ -331,7 +331,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       if (error) throw error;
       setBarberSchedules(data || []);
     } catch (error) {
-      toast.error('Error al cargar los horarios de barberos');
+      toast.error('Error al cargar los horarios de asistentes');
     }
   };
 
@@ -490,7 +490,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         appointmentQuery = appointmentQuery.eq('barber_id', queryBarberIdAsNumber);
       }
       // Si queryBarberIdAsNumber es null (consulta general), no se filtra por barber_id en citas,
-      // lo que significa que si CUALQUIER barbero tiene cita, bloquea el slot general. Esto es usualmente correcto.
+      // lo que significa que si CUALQUIER asistente tiene cita, bloquea el slot general. Esto es usualmente correcto.
       
       const { data: appointmentsData, error: appointmentError } = await appointmentQuery;
 
@@ -635,12 +635,12 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
           // No valid ID from appointmentData, and no valid default_barber_id either.
           if (adminSettings.multiple_barbers_enabled) {
             console.error("Error: No barber ID provided in appointmentData, and no valid default_barber_id is set, while multiple barbers are enabled.");
-            throw new Error('No se pudo determinar un barbero para la cita. Por favor, seleccione un barbero o configure un barbero por defecto.');
+            throw new Error('No se pudo determinar un asistente para la cita. Por favor, seleccione un asistente o configure un asistente por defecto.');
           } else {
             // Single barber mode, but default_barber_id is missing or invalid.
             // Or, if not multiple_barbers_enabled, but determinedBarberId was still somehow invalid (e.g. null from a bug)
             console.error("Error: default_barber_id is not set or is invalid, or no barberId provided in single barber mode.");
-            throw new Error('Error de configuración: El barbero por defecto no está configurado o es inválido, o no se proporcionó barbero.');
+            throw new Error('Error de configuración: El asistente por defecto no está configurado o es inválido, o no se proporcionó asistente.');
           }
         }
       }
@@ -650,7 +650,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       if (!isValidBarberId) {
          // This should ideally not be reached if the logic above is correct.
         console.error("Critical Error: determinedBarberId is still not valid after all checks.");
-        throw new Error('Error crítico inesperado al determinar el barbero para la cita.');
+        throw new Error('Error crítico inesperado al determinar el asistente para la cita.');
       }
 
       // If determinedBarberId was a string, trim it. Numbers don't need trimming.
@@ -694,7 +694,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       }
       
       try {
-        // Obtener el barbero para la notificación
+        // Obtener el asistente para la notificación
         const barber = barbers.find(b => b.id === determinedBarberId) || newAppointment.barber;
         const barberPhone = barber?.phone || '+18092033894';
         
@@ -705,8 +705,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
           date: format(appointmentData.date, 'dd/MM/yyyy'),
           time: appointmentData.time,
           service: appointmentData.service,
-          barberName: barber?.name || 'Barbero',
-          barberPhone: barberPhone, // Este es el teléfono del destinatario (barbero)
+          barberName: barber?.name || 'Asistente',
+          barberPhone: barberPhone, // Este es el teléfono del destinatario (asistente)
           recipientPhone: barberPhone, // Satisfy interface, primary use is barberPhone for this func
         });
       } catch (whatsappError) {
@@ -749,7 +749,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       ));
       
       try {
-        // Notificación al CLIENTE cuando el negocio/barbero cancela
+        // Notificación al CLIENTE cuando el negocio/asistente cancela
         const barber = barbers.find(b => b.id === appointmentToCancel.barber_id);
         
         await notifyAppointmentCancelled({
@@ -759,9 +759,9 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
           date: format(appointmentToCancel.date, 'dd/MM/yyyy'),
           time: appointmentToCancel.time,
           service: appointmentToCancel.service,
-          barberName: barber?.name || 'la Barbería', // Nombre del barbero o genérico
+          barberName: barber?.name || 'la Barbería', // Nombre del asistente o genérico
           cancellationInitiator: 'business', // Cancelación iniciada por el negocio
-          businessName: adminSettings.business_name || "D' Gastón Stylo Barbería" // Opcional, si se quiere pasar explícitamente
+          businessName: adminSettings.business_name || "Sistema de Citas" // Opcional, si se quiere pasar explícitamente
         });
       } catch (whatsappError) {
         console.error('Error enviando WhatsApp de notificación de cancelación al cliente:', whatsappError);
@@ -788,7 +788,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         const { data: existingSpecificHoliday, error: checkError } = await existingHolidayCheckQuery;
         if (checkError) throw checkError;
         if (existingSpecificHoliday && existingSpecificHoliday.length > 0) {
-          throw new Error('Este barbero ya tiene un feriado programado en esta fecha.');
+          throw new Error('Este asistente ya tiene un feriado programado en esta fecha.');
         }
       } else {
         // Creating a general holiday
@@ -817,7 +817,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       const newHoliday = { ...data, date: parseSupabaseDate(data.date) };
       setHolidays(prev => [...prev, newHoliday].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())); // Keep sorted
-      toast.success(holidayData.barber_id ? 'Feriado específico para barbero agregado.' : 'Feriado general agregado.');
+      toast.success(holidayData.barber_id ? 'Feriado específico para asistente agregado.' : 'Feriado general agregado.');
       return newHoliday;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Error al crear el feriado');
@@ -886,7 +886,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
   };
 
-  // Funciones para barberos
+  // Funciones para asistentes
   const createBarber = async (barberData: Omit<Barber, 'id' | 'created_at' | 'updated_at'>): Promise<Barber> => {
     try {
       const { data, error } = await supabase
@@ -896,10 +896,10 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         .single();
       if (error) throw error;
       setBarbers(prev => [...prev, data]);
-      toast.success('Barbero agregado exitosamente');
+      toast.success('Asistente agregado exitosamente');
       return data;
     } catch (error) {
-      toast.error('Error al agregar barbero');
+      toast.error('Error al agregar Asistente');
       throw error;
     }
   };
@@ -912,9 +912,9 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         .eq('id', id);
       if (error) throw error;
       setBarbers(prev => prev.map(b => b.id === id ? { ...b, ...barberData } : b));
-      toast.success('Barbero actualizado exitosamente');
+      toast.success('Asistente actualizado exitosamente');
     } catch (error) {
-      toast.error('Error al actualizar barbero');
+      toast.error('Error al actualizar Asistente');
       throw error;
     }
   };
@@ -931,7 +931,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (scheduleError) {
         console.error(`[deleteBarber] Error deleting barber schedules for barber_id: ${id}`, scheduleError);
-        throw new Error(`Error al eliminar los horarios del barbero: ${scheduleError.message}`);
+        throw new Error(`Error al eliminar los horarios del asistente: ${scheduleError.message}`);
       }
       console.log(`[deleteBarber] Successfully deleted barber_schedules for barber_id: ${id}`);
 
@@ -944,17 +944,17 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (barberError) {
         console.error(`[deleteBarber] Error deleting barber from barbers table with id: ${id}`, barberError);
-        throw new Error(`Error al eliminar el barbero: ${barberError.message}`);
+        throw new Error(`Error al eliminar el asistente: ${barberError.message}`);
       }
       console.log(`[deleteBarber] Successfully deleted barber from barbers table with id: ${id}`);
 
       setBarbers(prev => prev.filter(b => b.id !== id));
       // Also update barberSchedules state locally if needed, though re-fetch might be simpler
       setBarberSchedules(prev => prev.filter(bs => bs.barber_id !== id));
-      toast.success('Barbero y sus horarios eliminados exitosamente');
+      toast.success('asistente y sus horarios eliminados exitosamente');
     } catch (error) {
       console.error(`[deleteBarber] Catch block error for barber_id: ${id}`, error);
-      toast.error(error instanceof Error ? error.message : 'Error al eliminar barbero');
+      toast.error(error instanceof Error ? error.message : 'Error al eliminar asistente');
       throw error; // Re-throw para que el llamador pueda saber que falló
     }
   };
@@ -978,7 +978,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
   };
 
-  // Funciones para horarios de barberos
+  // Funciones para horarios de asistentes
   const updateBarberSchedule = async (barberId: string, dayOfWeek: number, schedule: Partial<BarberSchedule>): Promise<void> => {
     try {
       const { error } = await supabase
@@ -991,9 +991,9 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         });
       if (error) throw error;
       await fetchBarberSchedules();
-      toast.success('Horario del barbero actualizado exitosamente');
+      toast.success('Horario del asistente actualizado exitosamente');
     } catch (error) {
-      toast.error('Error al actualizar horario del barbero');
+      toast.error('Error al actualizar horario del asistente');
       throw error;
     }
   };
@@ -1088,7 +1088,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
 
       if (error) {
         if (error.code === 'PGRST116') { // Not found
-          toast.error('Clave de acceso incorrecta o barbero no encontrado.');
+          toast.error('Clave de acceso incorrecta o asistente no encontrado.');
         } else {
           toast.error('Error al verificar la clave de acceso.');
         }

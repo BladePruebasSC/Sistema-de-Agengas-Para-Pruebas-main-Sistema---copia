@@ -16,14 +16,14 @@ const BarberSelector: React.FC<BarberSelectorProps> = ({
   if (barbers.length === 0) {
     return (
       <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center">
-        <p className="text-gray-600 font-medium">No hay barberos disponibles.</p>
+        <p className="text-gray-600 font-medium">No hay asistentes disponibles.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <h4 className="text-md font-medium mb-3 text-gray-700">Selecciona tu barbero:</h4>
+      <h4 className="text-md font-medium mb-3 text-gray-700">Selecciona tu asistentes:</h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {barbers.map((barber) => (
           <button
@@ -49,7 +49,7 @@ const BarberSelector: React.FC<BarberSelectorProps> = ({
               </div>
               <div>
                 <p className="font-medium">{barber.name}</p>
-                <p className="text-sm text-gray-500">Barbero profesional</p>
+                <p className="text-sm text-gray-500">Asistente</p>
               </div>
             </div>
           </button>

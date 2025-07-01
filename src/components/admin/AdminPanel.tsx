@@ -83,7 +83,7 @@ const AdminPanel: React.FC = () => {
               }`}
               onClick={() => setTab('barberSchedules')}
             >
-              Horarios Barberos
+              Horarios Asistentes
             </button>
           )}
           <button

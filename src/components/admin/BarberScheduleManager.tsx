@@ -27,7 +27,7 @@ const BarberScheduleManager: React.FC = () => {
 
   useEffect(() => {
     if (selectedBarberId) {
-      // Inicializar horarios del barbero seleccionado
+      // Inicializar horarios del asistente seleccionado
       const initialSchedule = DAYS_OF_WEEK.map(day => {
         const existing = barberSchedules.find(bs => 
           bs.barber_id === selectedBarberId && bs.day_of_week === day.value
@@ -58,7 +58,7 @@ const BarberScheduleManager: React.FC = () => {
 
   const saveBarberSchedule = async () => {
     if (!selectedBarberId) {
-      toast.error('Selecciona un barbero');
+      toast.error('Selecciona un asistente');
       return;
     }
 
@@ -67,9 +67,9 @@ const BarberScheduleManager: React.FC = () => {
       for (const schedule of scheduleSettings) {
         await updateBarberSchedule(selectedBarberId, schedule.day_of_week, schedule);
       }
-      toast.success('Horarios del barbero actualizados exitosamente');
+      toast.success('Horarios del asistente actualizados exitosamente');
     } catch (error) {
-      console.error('Error guardando horarios del barbero:', error);
+      console.error('Error guardando horarios del asistente:', error);
       toast.error('Error al guardar los horarios');
     } finally {
       setLoading(false);
@@ -99,13 +99,13 @@ const BarberScheduleManager: React.FC = () => {
     <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6"> {/* Adjusted padding */}
       <div className="flex items-center mb-6">
         <User className="h-6 w-6 text-blue-600 mr-2" />
-        <h2 className="text-xl font-semibold">Horarios por Barbero</h2>
+        <h2 className="text-xl font-semibold">Horarios por asistente</h2>
       </div>
 
-      {/* Selector de barbero */}
+      {/* Selector de asistente */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Seleccionar Barbero
+          Seleccionar asistente
         </label>
         {/* Adjusted for responsiveness: flex-col on small, md:flex-row on medium+ */}
         <div className="flex flex-col md:flex-row md:items-center md:space-x-4 space-y-3 md:space-y-0">
@@ -114,7 +114,7 @@ const BarberScheduleManager: React.FC = () => {
             onChange={(e) => setSelectedBarberId(e.target.value)}
             className="block w-full md:w-64 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" // w-full on small, md:w-64 on medium+
           >
-            <option value="">Seleccionar barbero</option>
+            <option value="">Seleccionar asistente</option>
             {barbers.map(barber => (
               <option key={barber.id} value={barber.id}>
                 {barber.name}
@@ -141,7 +141,7 @@ const BarberScheduleManager: React.FC = () => {
               Horarios de {barbers.find(b => b.id === selectedBarberId)?.name}
             </h3>
             <p className="text-gray-600 text-sm mb-6">
-              Configura los horarios específicos para este barbero. Si no se configuran, se usarán los horarios generales del negocio.
+              Configura los horarios específicos para este asistente. Si no se configuran, se usarán los horarios generales del negocio.
             </p>
 
             <div className="space-y-4">
@@ -238,7 +238,7 @@ const BarberScheduleManager: React.FC = () => {
       {!selectedBarberId && (
         <div className="text-center py-8">
           <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500">Selecciona un barbero para configurar sus horarios específicos.</p>
+          <p className="text-gray-500">Selecciona un asistente para configurar sus horarios específicos.</p>
         </div>
       )}
     </div>
