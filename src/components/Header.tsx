@@ -13,7 +13,7 @@ const Header: React.FC = () => {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-4 md:mb-0">
             <Scissors className="h-8 w-8 text-red-500 mr-2" />
-            <h1 className="text-2xl font-bold">D' Gaston Stylo</h1>
+            <h1 className="text-2xl font-bold">Sistema de Citas</h1>
           </div>
           
           {/* Navigation: Stacks vertically on mobile, row on md and up */}
