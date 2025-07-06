@@ -141,7 +141,8 @@ const MyBarberAppointmentsPage: React.FC = () => {
                     onClick={async () => {
                       if (window.confirm(`¿Estás seguro de que deseas cancelar esta cita con ${app.clientName}?\nFecha: ${format(new Date(app.date), "d 'de' MMMM", { locale: es })}\nHora: ${app.time}`)) {
                         try {
-                          await cancelAppointment(app.id);
+                          // Pasar 'admin' como segundo parámetro para indicar que el barbero/admin cancela
+                          await cancelAppointment(app.id, 'admin');
                           toast.success('Cita cancelada exitosamente.');
                           // La lista se actualizará automáticamente porque getAppointmentsForBarber
                           // filtra las citas canceladas.

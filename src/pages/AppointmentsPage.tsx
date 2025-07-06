@@ -46,7 +46,8 @@ const AppointmentsPage: React.FC = () => {
     if (isConfirmed) {
       try {
         console.log('Intentando cancelar cita con ID:', id);
-        await cancelAppointment(id);
+        // Pasar 'user' como segundo parámetro para indicar que el usuario cancela
+        await cancelAppointment(id, 'user');
         toast.success('Cita cancelada exitosamente');
       } catch (error) {
         console.error('Error al cancelar la cita:', error);

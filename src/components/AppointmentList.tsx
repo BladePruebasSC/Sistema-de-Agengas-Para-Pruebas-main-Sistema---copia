@@ -75,7 +75,8 @@ const AppointmentList: React.FC = () => {
                         onClick={async () => {
                           if (window.confirm(`¿Estás seguro de que deseas cancelar la cita de ${appointment.clientName} el ${format(new Date(appointment.date), "d/MM/yy")} a las ${appointment.time}?`)) {
                             try {
-                              await cancelAppointment(appointment.id);
+                              // Pasar 'admin' como segundo parámetro para indicar que el admin cancela
+                              await cancelAppointment(appointment.id, 'admin');
                               toast.success('Cita cancelada exitosamente.');
                             } catch (error) {
                               toast.error('Error al cancelar la cita.');

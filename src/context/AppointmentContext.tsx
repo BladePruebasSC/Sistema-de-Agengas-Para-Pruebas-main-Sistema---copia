@@ -19,7 +19,7 @@ interface AppointmentContextType {
   services: Service[]; // Added services
   userPhone: string | null;
   setUserPhone: (phone: string) => void;
-  cancelAppointment: (id: string) => Promise<void>;
+  cancelAppointment: (id: string, cancelledBy?: 'user' | 'admin') => Promise<void>; // Modified signature
   createAppointment: (appointmentData: CreateAppointmentData) => Promise<Appointment>;
   createHoliday: (holidayData: Omit<Holiday, 'id'>) => Promise<Holiday>;
   createBlockedTime: (blockedTimeData: Omit<BlockedTime, 'id'>) => Promise<BlockedTime>;
@@ -731,7 +731,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
   };
 
-  const cancelAppointment = async (id: string): Promise<void> => {
+  const cancelAppointment = async (id: string, cancelledBy: 'user' | 'admin' = 'admin'): Promise<void> => {
     try {
       const appointmentToCancel = appointments.find(app => app.id === id);
       if (!appointmentToCancel) return;
@@ -753,24 +753,43 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       ));
       
       try {
-        // Notificación al CLIENTE cuando el negocio/asistente cancela
         const barber = barbers.find(b => b.id === appointmentToCancel.barber_id);
         
-        await notifyAppointmentCancelled({
-          recipientPhone: appointmentToCancel.clientPhone, // Enviar al cliente
-          clientName: appointmentToCancel.clientName,
-          clientPhone: appointmentToCancel.clientPhone, // Aún necesario para contexto del mensaje
-          date: format(appointmentToCancel.date, 'dd/MM/yyyy'),
-          time: appointmentToCancel.time,
-          service: appointmentToCancel.service,
-          barberName: barber?.name || 'la Barbería', // Nombre del asistente o genérico
-          cancellationInitiator: 'business', // Cancelación iniciada por el negocio
-          businessName: adminSettings.business_name || "Sistema de Citas" // Opcional, si se quiere pasar explícitamente
-        });
+        if (cancelledBy === 'user') {
+          // Usuario cancela su cita → Notificar al admin/barbero
+          const adminPhone = barber?.phone || '+18092033894';
+          await notifyAppointmentCancelled({
+            recipientPhone: adminPhone, // Enviar al admin/barbero
+            clientName: appointmentToCancel.clientName,
+            clientPhone: appointmentToCancel.clientPhone,
+            date: format(appointmentToCancel.date, 'dd/MM/yyyy'),
+            time: appointmentToCancel.time,
+            service: appointmentToCancel.service,
+            barberName: barber?.name || 'Asistente',
+            cancellationInitiator: 'client', // Cliente canceló
+            businessName: "D' Gastón Stylo Barbería"
+          });
+        } else {
+          // Admin/barbero cancela cita → Notificar al cliente
+          await notifyAppointmentCancelled({
+            recipientPhone: appointmentToCancel.clientPhone, // Enviar al cliente
+            clientName: appointmentToCancel.clientName,
+            clientPhone: appointmentToCancel.clientPhone,
+            date: format(appointmentToCancel.date, 'dd/MM/yyyy'),
+            time: appointmentToCancel.time,
+            service: appointmentToCancel.service,
+            barberName: barber?.name || 'la Barbería',
+            cancellationInitiator: 'business', // Negocio canceló
+            businessName: "D' Gastón Stylo Barbería"
+          });
+        }
       } catch (whatsappError) {
-        console.error('Error enviando WhatsApp de notificación de cancelación al cliente:', whatsappError);
+        console.error('Error enviando WhatsApp de notificación de cancelación:', whatsappError);
         // No fallar la cancelación de la cita si la notificación de WhatsApp falla
-        toast.error('Cita cancelada, pero hubo un error al notificar al cliente por WhatsApp.');
+        const errorMsg = cancelledBy === 'user' 
+          ? 'Cita cancelada, pero hubo un error al notificar al barbero por WhatsApp.'
+          : 'Cita cancelada, pero hubo un error al notificar al cliente por WhatsApp.';
+        toast.error(errorMsg);
       }
 
       toast.success('Cita cancelada exitosamente');
