@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar as CalendarIcon, Clock, XCircle, Settings as SettingsIcon, BarChart3, Star, User, Package } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAppointments } from '../../context/AppointmentContext';
@@ -9,12 +9,13 @@ import AdminSettings from './AdminSettings';
 import StatisticsPanel from './StatisticsPanel';
 import BarberScheduleManager from './BarberScheduleManager';
 import ServicesManagement from './ServicesManagement';
+import ManualServicesManagement from './ManualServicesManagement';
 import AppointmentList from '../AppointmentList';
 import ReviewsManagement from '../reviews/ReviewsManagement';
 import { Holiday, BlockedTime } from '../../types';
 
 const AdminPanel: React.FC = () => {
-  const [tab, setTab] = useState<'appointments' | 'holidays' | 'blockedTimes' | 'settings' | 'statistics' | 'reviews' | 'barberSchedules' | 'services'>('appointments');
+  const [tab, setTab] = useState<'appointments' | 'holidays' | 'blockedTimes' | 'settings' | 'statistics' | 'reviews' | 'barberSchedules' | 'services' | 'manualServices'>('appointments');
   const { holidays, blockedTimes, removeHoliday, removeBlockedTime, adminSettings } = useAppointments();
 
   return (
@@ -64,6 +65,16 @@ const AdminPanel: React.FC = () => {
             onClick={() => setTab('services')}
           >
             Servicios
+          </button>
+          <button
+            className={`py-2 px-4 font-medium text-sm whitespace-nowrap ${
+              tab === 'manualServices'
+                ? 'text-red-600 border-b-2 border-red-600'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+            onClick={() => setTab('manualServices')}
+          >
+            Servicios Manuales
           </button>
           <button
             className={`py-2 px-4 font-medium text-sm whitespace-nowrap ${
@@ -123,6 +134,10 @@ const AdminPanel: React.FC = () => {
 
         {tab === 'services' && (
           <ServicesManagement />
+        )}
+
+        {tab === 'manualServices' && (
+          <ManualServicesManagement />
         )}
 
         {tab === 'barberSchedules' && adminSettings.multiple_barbers_enabled && (

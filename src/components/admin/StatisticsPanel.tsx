@@ -38,7 +38,7 @@ interface HourStats {
 }
 
 const StatisticsPanel: React.FC = () => {
-  const { appointments, barbers, adminSettings, services } = useAppointments(); // Added services from context
+  const { appointments, barbers, adminSettings, services, manualServices } = useAppointments(); // Added services and manualServices from context
   const [selectedMonth, setSelectedMonth] = useState(new Date());
   const [selectedBarberId, setSelectedBarberId] = useState<string | null>(null);
 
@@ -85,6 +85,28 @@ const StatisticsPanel: React.FC = () => {
   const calculateStatistics = () => {
     const activeAppointments = getFilteredAppointments();
     console.log('[StatisticsPanel] Active appointments for stats:', activeAppointments);
+    
+    // Combinar citas y servicios manuales para estadísticas completas
+    const allServices = [
+      ...activeAppointments.map(app => ({
+        date: app.date,
+        service: app.service,
+        serviceName: services.find(s => s.id === app.service)?.name || 'Servicio desconocido',
+        price: services.find(s => s.id === app.service)?.price || 0,
+        time: app.time,
+        barber_id: app.barber_id
+      })),
+      ...manualServices.map(ms => ({
+        date: ms.date,
+        service: ms.service_id,
+        serviceName: ms.service_name,
+        price: ms.price,
+        time: ms.time,
+        barber_id: ms.barber_id
+      }))
+    ];
+    
+    console.log('[StatisticsPanel] All services (appointments + manual):', allServices);
 
     // Estadísticas de los últimos 6 meses
     const last6Months = Array.from({ length: 6 }, (_, i) => {
@@ -92,20 +114,18 @@ const StatisticsPanel: React.FC = () => {
       const start = startOfMonth(date);
       const end = endOfMonth(date);
       
-      const monthAppointments = activeAppointments.filter(app => {
-        const appDate = new Date(app.date);
-        return appDate >= start && appDate <= end;
+      const monthServices = allServices.filter(service => {
+        const serviceDate = new Date(service.date);
+        return serviceDate >= start && serviceDate <= end;
       });
       
-      const revenue = monthAppointments.reduce((total, app) => {
-        const service = services.find(s => s.id === app.service);
-        // console.log(`[Stats - 6m Revenue] App service ID: ${app.service}, Found service: ${JSON.stringify(service)}, Price: ${service?.price}`);
-        return total + (service?.price || 0);
+      const revenue = monthServices.reduce((total, service) => {
+        return total + service.price;
       }, 0);
 
       return {
         month: format(date, 'MMM yyyy', { locale: es }),
-        appointments: monthAppointments.length,
+        appointments: monthServices.length,
         revenue
       };
     }).reverse();
@@ -115,28 +135,24 @@ const StatisticsPanel: React.FC = () => {
     // Estadísticas del mes seleccionado
     const start = startOfMonth(selectedMonth);
     const end = endOfMonth(selectedMonth);
-    const currentMonthAppointments = activeAppointments.filter(app => {
-      const appDate = new Date(app.date);
-      return appDate >= start && appDate <= end;
+    const currentMonthServices = allServices.filter(service => {
+      const serviceDate = new Date(service.date);
+      return serviceDate >= start && serviceDate <= end;
     });
 
     // Estadísticas por servicio
     const serviceCount = new Map<string, number>();
     const serviceRevenue = new Map<string, number>();
     
-    currentMonthAppointments.forEach(app => {
-      const service = services.find(s => s.id === app.service);
-      // console.log(`[Stats - ServiceCount] App service ID: ${app.service}, Found service: ${JSON.stringify(service)}`);
-      if (service) {
-        serviceCount.set(service.name, (serviceCount.get(service.name) || 0) + 1);
-        serviceRevenue.set(service.name, (serviceRevenue.get(service.name) || 0) + service.price);
-      }
+    currentMonthServices.forEach(service => {
+      serviceCount.set(service.serviceName, (serviceCount.get(service.serviceName) || 0) + 1);
+      serviceRevenue.set(service.serviceName, (serviceRevenue.get(service.serviceName) || 0) + service.price);
     });
 
     const serviceStatsArray: ServiceStats[] = Array.from(serviceCount.entries()).map(([name, count]) => ({
       serviceName: name,
       count,
-      percentage: (count / currentMonthAppointments.length) * 100,
+      percentage: (count / currentMonthServices.length) * 100,
       revenue: serviceRevenue.get(name) || 0
     })).sort((a, b) => b.count - a.count);
 
@@ -144,43 +160,41 @@ const StatisticsPanel: React.FC = () => {
 
     // Estadísticas por hora
     const hourCount = new Map<string, number>();
-    currentMonthAppointments.forEach(app => {
-      hourCount.set(app.time, (hourCount.get(app.time) || 0) + 1);
+    currentMonthServices.forEach(service => {
+      hourCount.set(service.time, (hourCount.get(service.time) || 0) + 1);
     });
 
     const hourStatsArray: HourStats[] = Array.from(hourCount.entries()).map(([hour, count]) => ({
       hour,
       count,
-      percentage: (count / currentMonthAppointments.length) * 100
+      percentage: (count / currentMonthServices.length) * 100
     })).sort((a, b) => b.count - a.count);
 
     setHourStats(hourStatsArray);
 
     // Estadísticas generales del mes actual
-    const totalRevenue = currentMonthAppointments.reduce((total, app) => {
-      const service = services.find(s => s.id === app.service);
-      // console.log(`[Stats - MonthRevenue] App service ID: ${app.service}, Found service: ${JSON.stringify(service)}, Price: ${service?.price}`);
-      return total + (service?.price || 0);
+    const totalRevenue = currentMonthServices.reduce((total, service) => {
+      return total + service.price;
     }, 0);
 
     const daysInMonth = end.getDate();
-    const averageDaily = currentMonthAppointments.length / daysInMonth;
+    const averageDaily = currentMonthServices.length / daysInMonth;
 
     // Calcular tasa de crecimiento comparando con el mes anterior
     const previousMonth = subMonths(selectedMonth, 1);
     const prevStart = startOfMonth(previousMonth);
     const prevEnd = endOfMonth(previousMonth);
-    const previousMonthAppointments = activeAppointments.filter(app => {
-      const appDate = new Date(app.date);
-      return appDate >= prevStart && appDate <= prevEnd;
+    const previousMonthServices = allServices.filter(service => {
+      const serviceDate = new Date(service.date);
+      return serviceDate >= prevStart && serviceDate <= prevEnd;
     });
 
-    const growthRate = previousMonthAppointments.length > 0 
-      ? ((currentMonthAppointments.length - previousMonthAppointments.length) / previousMonthAppointments.length) * 100
+    const growthRate = previousMonthServices.length > 0 
+      ? ((currentMonthServices.length - previousMonthServices.length) / previousMonthServices.length) * 100
       : 0;
 
     setCurrentMonthStats({
-      totalAppointments: currentMonthAppointments.length,
+      totalAppointments: currentMonthServices.length,
       totalRevenue,
       averageDaily: Math.round(averageDaily * 10) / 10,
       mostPopularService: serviceStatsArray[0]?.serviceName || 'N/A',
@@ -464,7 +478,7 @@ const StatisticsPanel: React.FC = () => {
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 lg:p-4">
         <p className="text-xs lg:text-sm text-blue-800">
-          <strong>Nota:</strong> Las estadísticas incluyen solo las citas activas (no canceladas) para un análisis preciso del negocio.
+          <strong>Nota:</strong> Las estadísticas incluyen citas activas (no canceladas) y servicios manuales registrados para un análisis completo del negocio.
           {selectedBarberId && ` Mostrando datos específicos para ${getBarberName(selectedBarberId)}.`}
         </p>
       </div>

@@ -218,7 +218,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                 className="rounded-lg border"
                 next2Label={null}
                 prev2Label={null}
-                locale={es}
+                locale="es"
                 formatDay={(locale, date) => format(date, 'd')}
                 formatMonth={(locale, date) => format(date, 'MMMM', { locale: es })}
                 formatMonthYear={(locale, date) => format(date, 'MMMM yyyy', { locale: es })}

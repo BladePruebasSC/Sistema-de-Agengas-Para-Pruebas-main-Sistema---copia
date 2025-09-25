@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
-import { Appointment, Holiday, BlockedTime, Barber, BusinessHours, BarberSchedule, AdminSettings, Review, CreateReviewData, Service } from '../types';
+import { Appointment, Holiday, BlockedTime, Barber, BusinessHours, BarberSchedule, AdminSettings, Review, CreateReviewData, Service, ManualService, CreateManualServiceData } from '../types';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { notifyAppointmentCreated, notifyAppointmentCancelled } from '../utils/whatsapp'; // MODIFIED IMPORT
@@ -17,6 +17,7 @@ interface AppointmentContextType {
   adminSettings: AdminSettings;
   reviews: Review[];
   services: Service[]; // Added services
+  manualServices: ManualService[]; // Added manual services
   userPhone: string | null;
   setUserPhone: (phone: string) => void;
   cancelAppointment: (id: string, cancelledBy?: 'user' | 'admin') => Promise<void>; // Modified signature
@@ -52,6 +53,10 @@ interface AppointmentContextType {
   createService: (serviceData: Omit<Service, 'created_at'>) => Promise<Service>;
   updateService: (id: string, serviceData: Partial<Service>) => Promise<void>;
   deleteService: (id: string) => Promise<void>;
+  // Funciones para servicios manuales
+  createManualService: (manualServiceData: CreateManualServiceData) => Promise<ManualService>;
+  updateManualService: (id: string, manualServiceData: Partial<ManualService>) => Promise<void>;
+  deleteManualService: (id: string) => Promise<void>;
   // Barber Access Key Auth
   loggedInBarber: Barber | null;
   verifyBarberAccessKey: (accessKey: string) => Promise<Barber | null>;
@@ -126,6 +131,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
   const [barberSchedules, setBarberSchedules] = useState<BarberSchedule[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [services, setServices] = useState<Service[]>([]); // Added services state
+  const [manualServices, setManualServices] = useState<ManualService[]>([]); // Added manual services state
   const [adminSettings, setAdminSettings] = useState<AdminSettings>({
     id: '',
     early_booking_restriction: false,
@@ -369,6 +375,28 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
   };
 
+  const fetchManualServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('manual_services')
+        .select(`
+          *,
+          barber:barbers(id, name)
+        `)
+        .order('date', { ascending: false })
+        .order('time', { ascending: false });
+      if (error) throw error;
+      const formattedManualServices = data.map(manualService => ({
+        ...manualService,
+        date: parseSupabaseDate(manualService.date)
+      }));
+      setManualServices(formattedManualServices);
+    } catch (error) {
+      console.error('Error fetching manual services:', error);
+      toast.error('Error al cargar los servicios manuales');
+    }
+  };
+
   useEffect(() => {
     const initializeData = async () => {
       await loadAdminSettings();
@@ -380,7 +408,8 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
         fetchBusinessHours(),
         fetchBarberSchedules(),
         fetchReviews(),
-        fetchServices() // Added fetchServices
+        fetchServices(), // Added fetchServices
+        fetchManualServices() // Added fetchManualServices
       ]);
     };
     
@@ -767,7 +796,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
             service: appointmentToCancel.service,
             barberName: barber?.name || 'Asistente',
             cancellationInitiator: 'client', // Cliente canceló
-            businessName: "D' Gastón Stylo Barbería"
+            businessName: "029 Barber Shop"
           });
         } else {
           // Admin/barbero cancela cita → Notificar al cliente
@@ -778,9 +807,9 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
             date: format(appointmentToCancel.date, 'dd/MM/yyyy'),
             time: appointmentToCancel.time,
             service: appointmentToCancel.service,
-            barberName: barber?.name || 'la Barbería',
+            barberName: barber?.name || '029 Barber Shop',
             cancellationInitiator: 'business', // Negocio canceló
-            businessName: "D' Gastón Stylo Barbería"
+            businessName: "029 Barber Shop"
           });
         }
       } catch (whatsappError) {
@@ -1142,6 +1171,86 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     }
   };
 
+  // Funciones para servicios manuales
+  const createManualService = async (manualServiceData: CreateManualServiceData): Promise<ManualService> => {
+    try {
+      // Obtener información del servicio
+      const service = services.find(s => s.id === manualServiceData.service_id);
+      if (!service) {
+        throw new Error('Servicio no encontrado');
+      }
+
+      const formattedDate = formatDateForSupabase(manualServiceData.date);
+      
+      const { data, error } = await supabase
+        .from('manual_services')
+        .insert([{
+          client_name: manualServiceData.client_name,
+          client_phone: manualServiceData.client_phone ? formatPhoneForWhatsApp(manualServiceData.client_phone) : '',
+          service_id: manualServiceData.service_id,
+          service_name: service.name,
+          price: service.price,
+          barber_id: manualServiceData.barber_id || null,
+          date: formattedDate,
+          time: manualServiceData.time,
+          notes: manualServiceData.notes || null
+        }])
+        .select(`
+          *,
+          barber:barbers(id, name)
+        `)
+        .single();
+      
+      if (error) throw error;
+      
+      const parsedManualService = {
+        ...data,
+        date: parseSupabaseDate(data.date)
+      };
+      
+      setManualServices(prev => [parsedManualService, ...prev]);
+      toast.success('Servicio manual registrado exitosamente');
+      return parsedManualService;
+    } catch (error) {
+      toast.error('Error al registrar el servicio manual');
+      throw error;
+    }
+  };
+
+  const updateManualService = async (id: string, manualServiceData: Partial<ManualService>): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('manual_services')
+        .update(manualServiceData)
+        .eq('id', id);
+      if (error) throw error;
+      
+      setManualServices(prev => prev.map(ms => 
+        ms.id === id ? { ...ms, ...manualServiceData } : ms
+      ));
+      toast.success('Servicio manual actualizado exitosamente');
+    } catch (error) {
+      toast.error('Error al actualizar el servicio manual');
+      throw error;
+    }
+  };
+
+  const deleteManualService = async (id: string): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('manual_services')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      
+      setManualServices(prev => prev.filter(ms => ms.id !== id));
+      toast.success('Servicio manual eliminado exitosamente');
+    } catch (error) {
+      toast.error('Error al eliminar el servicio manual');
+      throw error;
+    }
+  };
+
   const handleSetUserPhone = (phone: string) => {
     setUserPhone(phone);
     localStorage.setItem('userPhone', phone);
@@ -1211,6 +1320,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     adminSettings,
     reviews,
     services, // Added services
+    manualServices, // Added manual services
     userPhone,
     setUserPhone: handleSetUserPhone,
     cancelAppointment,
@@ -1241,6 +1351,10 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     createService,
     updateService,
     deleteService,
+    // Funciones para servicios manuales
+    createManualService,
+    updateManualService,
+    deleteManualService,
     // Barber Access Key Auth
     loggedInBarber,
     verifyBarberAccessKey,
