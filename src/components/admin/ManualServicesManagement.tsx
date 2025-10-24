@@ -88,7 +88,7 @@ const ManualServicesManagement: React.FC = () => {
         client_name: formData.client_name.trim(),
         client_phone: formData.client_phone.trim(),
         service_id: formData.service_id,
-        barber_id: formData.barber_id ? parseInt(formData.barber_id, 10) : undefined,
+        barber_id: formData.barber_id || undefined,
         date: formData.date,
         time: formData.time,
         notes: formData.notes.trim() || undefined
@@ -115,7 +115,7 @@ const ManualServicesManagement: React.FC = () => {
       client_name: service.client_name,
       client_phone: service.client_phone,
       service_id: service.service_id,
-      barber_id: service.barber_id ? service.barber_id.toString() : '',
+      barber_id: service.barber_id || '',
       date: service.date,
       time: service.time,
       notes: service.notes || ''

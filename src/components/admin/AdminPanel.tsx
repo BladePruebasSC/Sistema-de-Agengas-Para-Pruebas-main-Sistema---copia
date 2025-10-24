@@ -140,6 +140,7 @@ const AdminPanel: React.FC = () => {
           <ManualServicesManagement />
         )}
 
+
         {tab === 'barberSchedules' && adminSettings.multiple_barbers_enabled && (
           <BarberScheduleManager />
         )}

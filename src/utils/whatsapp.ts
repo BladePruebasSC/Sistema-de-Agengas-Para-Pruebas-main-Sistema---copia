@@ -32,7 +32,7 @@ const createMessage = (
   data: WhatsAppMessageData
 ): string => {
   const { clientName, clientPhone, date, time, service, barberName, businessName, cancellationInitiator } = data;
-  const businessDisplayName = businessName || "029 Barber Shop"; // Default business name
+  const businessDisplayName = businessName || "D' Gastón Stylo Barbería"; // Default business name
 
   const messages = {
     created: `🔔 *NUEVA CITA REGISTRADA* 🔔

@@ -796,7 +796,7 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
             service: appointmentToCancel.service,
             barberName: barber?.name || 'Asistente',
             cancellationInitiator: 'client', // Cliente canceló
-            businessName: "029 Barber Shop"
+            businessName: "D' Gastón Stylo Barbería"
           });
         } else {
           // Admin/barbero cancela cita → Notificar al cliente
@@ -807,9 +807,9 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
             date: format(appointmentToCancel.date, 'dd/MM/yyyy'),
             time: appointmentToCancel.time,
             service: appointmentToCancel.service,
-            barberName: barber?.name || '029 Barber Shop',
+            barberName: barber?.name || 'la Barbería',
             cancellationInitiator: 'business', // Negocio canceló
-            businessName: "029 Barber Shop"
+            businessName: "D' Gastón Stylo Barbería"
           });
         }
       } catch (whatsappError) {

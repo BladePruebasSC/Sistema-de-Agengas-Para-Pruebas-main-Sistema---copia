@@ -12,8 +12,12 @@ const Header: React.FC = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-4 md:mb-0">
-            <Scissors className="h-8 w-8 text-red-500 mr-2" />
-            <h1 className="text-2xl font-bold">029 Barber Shop</h1>
+            <img 
+              src="/icono.png" 
+              alt="Gaston Stylo" 
+              className="h-12 w-12 mr-3 rounded-full"
+            />
+            <h1 className="text-4xl font-bold">Gaston Stylo</h1>
           </div>
           
           {/* Navigation: Stacks vertically on mobile, row on md and up */}

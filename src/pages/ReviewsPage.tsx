@@ -40,7 +40,7 @@ const ReviewsPage: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Reseñas y Calificaciones</h1>
         </div>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Descubre lo que nuestros clientes dicen sobre nuestros servicios en 029 Barber Shop. 
+          Descubre lo que nuestros clientes dicen sobre nuestros servicios de barbería. 
           Tu opinión es importante para nosotros y ayuda a otros clientes a tomar la mejor decisión.
         </p>
       </div>

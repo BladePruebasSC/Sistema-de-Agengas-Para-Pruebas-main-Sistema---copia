@@ -154,7 +154,7 @@ export interface ManualService {
   service_id: string;
   service_name: string;
   price: number;
-  barber_id?: number;
+  barber_id?: string;
   date: Date;
   time: string;
   notes?: string;
@@ -165,7 +165,7 @@ export interface CreateManualServiceData {
   client_name: string;
   client_phone: string;
   service_id: string;
-  barber_id?: number;
+  barber_id?: string;
   date: Date;
   time: string;
   notes?: string;
